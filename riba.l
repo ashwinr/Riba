@@ -1,7 +1,12 @@
 %{
 
+#define YYSTYPE char*
+
 #include <string.h>
 #include "riba.tab.h"
+#include "riba.h"
+
+extern YYSTYPE yylval;
 
 %}
 
@@ -15,28 +20,34 @@
 
 "=" { return R_EQ; }
 
-open { return R_CMD_OPEN; }
+^open { return R_CMD_OPEN; }
 
-close { return R_CMD_CLOSE; }
+^close$ { return R_CMD_CLOSE; }
 
-get { return R_CMD_GET; }
+^get { return R_CMD_GET; }
 
-put { return R_CMD_PUT; }
+^put { return R_CMD_PUT; }
 
-batch { return R_CMD_BATCH; }
+^batch$ { return R_CMD_BATCH; }
 
-commit { return R_CMD_COMMIT; }
+^commit$ { return R_CMD_COMMIT; }
 
-snap { return R_CMD_SNAP; }
+^snap$ { return R_CMD_SNAP; }
 
-unsnap { return R_CMD_UNSNAP; }
+^unsnap$ { return R_CMD_UNSNAP; }
 
-list { return R_CMD_LIST; }
+^print { return R_CMD_PRINT; }
 
-\'.+\' { return R_QWORD; }
+^help { return R_CMD_HELP; }
 
-[0-9]+ { return R_NUMBER; }
+keys { yylval = strdup(yytext); return R_ARG_KEYS; }
 
-0x[0-9a-fA-F]+ { return R_BYTES; }
+\'[^']+\' { yylval = strdup(yytext); return R_QWORD; }
+
+[0-9]+ { yylval = strdup(yytext); return R_NUMBER; }
+
+0x[0-9a-fA-F]+ { yylval = strdup(yytext); return R_BYTES; }
+
+. /* Ignore everything else */ ;
 
 %%

@@ -4,6 +4,12 @@ int yyparse ();
 
 int main(int argc, char** argv)
 {
-  yyparse();
+  // If processing from stdin, keep on evaluating
+  while(1)
+  {
+    yyparse();
+  }
+
+  // Unnecessary
   return 0;
 }
