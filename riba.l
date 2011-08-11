@@ -28,6 +28,8 @@ extern YYSTYPE yylval;
 
 ^put { return R_CMD_PUT; }
 
+^delete { return R_CMD_DELETE; }
+
 ^batch$ { return R_CMD_BATCH; }
 
 ^commit$ { return R_CMD_COMMIT; }
@@ -36,13 +38,16 @@ extern YYSTYPE yylval;
 
 ^unsnap$ { return R_CMD_UNSNAP; }
 
-^print { return R_CMD_PRINT; }
+^print$ { return R_CMD_PRINT; }
 
-^help { return R_CMD_HELP; }
+^count$ { return R_CMD_COUNT; }
+
+^help$ { return R_CMD_HELP; }
+
 
 keys { yylval = strdup(yytext); return R_ARG_KEYS; }
 
-\'[^']+\' { yylval = strdup(yytext); return R_QWORD; }
+\'[^']+\' { yylval = strdup(yytext+1); yylval[strlen(yylval)-1] = 0; return R_QWORD; }
 
 [0-9]+ { yylval = strdup(yytext); return R_NUMBER; }
 
