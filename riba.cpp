@@ -187,7 +187,6 @@ void leveldb_put(const char* key, const char* value)
   if(should_batch)
   {
     lbatch.Put(key_slice, value_slice);
-    return;
   }
   else
   {
