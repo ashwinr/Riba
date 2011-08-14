@@ -44,8 +44,7 @@ extern YYSTYPE yylval;
 
 ^help$ { return R_CMD_HELP; }
 
-
-keys { yylval = strdup(yytext); return R_ARG_KEYS; }
+^about$ { return R_CMD_ABOUT; }
 
 \'[^']+\' { yylval = strdup(yytext+1); yylval[strlen(yylval)-1] = 0; return R_QWORD; }
 

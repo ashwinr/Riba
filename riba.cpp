@@ -80,7 +80,7 @@ leveldb::Slice make_slice(const char* sdata)
     {
       char nibble_low = from_hex(sdata[i]);
       char nibble_high = (i>0) ? from_hex(sdata[i-1]) : 0;
-      // If either character is not a valid hex character, bail out
+      // If neither character is a valid hex character, bail out
       if(nibble_low == -1 || nibble_high == -1)
       {
         free(hdata);
@@ -202,7 +202,23 @@ void leveldb_put(const char* key, const char* value)
 
 void leveldb_delete(const char* key)
 {
+  assert(ldb);
   
+  leveldb::Slice key_slice = make_slice(key);
+  
+  if(should_batch)
+  {
+    lbatch.Delete(key_slice);
+    return;
+  }
+  else
+  {
+    leveldb::Status s = ldb->Delete(leveldb::WriteOptions(), key_slice);
+    if(!s.ok())
+      std::cerr << s.ToString() << std::endl;
+  }
+  
+  free(const_cast<char*>(key_slice.data()));
 }
 
 void leveldb_start_batch()
@@ -249,12 +265,87 @@ void leveldb_unsnap()
   }
 }
 
-void leveldb_print(const char* what)
+void leveldb_print()
 {
+  assert(ldb);
 
+  leveldb::Iterator* it = ldb->NewIterator(leveldb::ReadOptions());
+  for(it->SeekToFirst(); it->Valid(); it->Next())
+  {
+    std::cout << it->key() << " : " <<  it->value() << std::endl;
+  }
+  assert(it->status().ok());
+  delete it;
 }
 
+// Currently an inefficient way of printing out the total number of elements
+// in the database, until a more efficient method can be found
 void leveldb_count()
 {
+  assert(ldb);
 
+  size_t count = 0;
+  leveldb::Iterator* it = ldb->NewIterator(leveldb::ReadOptions());
+
+  for(it->SeekToFirst(); it->Valid(); it->Next(), count++);
+
+  assert(it->status().ok());
+  std::cout << count << std::endl;
+
+  delete it;
+}
+
+void leveldb_help(void)
+{
+  std::cout << "The following list of commands are supported in riba:" << std::endl;
+  std::cout << "open" << std::endl;
+  std::cout << "close" << std::endl;
+  std::cout << "get" << std::endl;
+  std::cout << "put" << std::endl;
+  std::cout << "delete" << std::endl;
+  std::cout << "batch" << std::endl;
+  std::cout << "commit" << std::endl;
+  std::cout << "snap" << std::endl;
+  std::cout << "unsnap" << std::endl;
+  std::cout << "print" << std::endl;
+  std::cout << "count" << std::endl;
+  std::cout << "help" << std::endl;
+  std::cout << "about" << std::endl;
+}
+
+void leveldb_about(void)
+{
+  std::cout <<
+"\n                                  riba - A REPL for leveldb"
+"\n"
+"\n"
+"             ...                        M                                      \n"
+"           .M.M                     M MM M          MMMMMMMMM. .               \n"
+"          MMMM.                   .  M M. M     MMM..       ...MMMM            \n"
+"         M MMM                   . M M  M..M MM                  ..MMM         \n"
+"        MMM..M                 M.M  M.M. M.M.         MMMM..         MMM       \n"
+"MMM.M  M .MMMM                ..M.M M. MMM         MMMMMMMMMM.         MM.     \n"
+"M M M MM   M.M              .M  M.M  .MM         . MMMMMMMM   M         .MM    \n"
+"  .MM M..MM..M                M.M .M M .         M   MMMMM     .          MM   \n"
+"    .MM  M.  M          . .M MM . .MM            M             .          .M   \n"
+"      M      M          M  M  M MMN               M.          M            MM  \n"
+"       M     .M      .  M..M. MMM    M.             M.      MM             .MM \n"
+"              .M      . M..M.M .     M     M         ...M.                  MM.\n"
+"         .M     M.  M   M. M          M.   M                            . MM   \n"
+"           M       MMMMM       M   .         .         MMM .   . . MMMMM       \n"
+"           .M                 M    M      M              MMMMMMM               \n"
+"             M           M.    M.   .    M                ..MMMM               \n"
+"             .M.         M                M                    MM              \n"
+"               MM         .  M                                   . MMM.        \n"
+"                 M           M.          .M..MMMMM                       MMMM  \n"
+"              MMMM M.         .    M      M MMM . M                        M   \n"
+"              M  .M MM                    M....   .                     .M     \n"
+"                .M MM .MM.                  MMMM..                     M       \n"
+"                M       .MMM                                      .MMM.        \n"
+"                          .MMMM                                MMMM            \n"
+"                               MMMMMM                 ..MMMMMM                 \n"
+"                            MMM..M. MMMMMMMMMMMMMMMMMMMMM                      \n"
+"                             MMM..M M M. ..  ..                                \n"
+"                                MM.MM.                                         \n"
+"                               MM                                              \n";
 }

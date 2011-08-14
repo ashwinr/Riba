@@ -8,12 +8,10 @@
 // External Declarations
 extern int yylex(void);
 
-char last_command[12];
-
 // Parser error handler
 void yyerror(const char* error)
 {
-	fprintf(stderr, "%s: %s\n", last_command, error);
+	fprintf(stderr, "%s\n", error);
 }
 
 
@@ -29,7 +27,7 @@ int yywrap()
 %token R_NEWLINE R_NUMBER R_BYTES R_QWORD R_COMMA R_SQUOTE R_EQ
 			 R_CMD_OPEN R_CMD_CLOSE R_CMD_GET R_CMD_PUT R_CMD_DELETE
 			 R_CMD_BATCH R_CMD_COMMIT R_CMD_SNAP R_CMD_UNSNAP R_CMD_PRINT
-			 R_CMD_COUNT R_CMD_HELP R_ARG_KEYS
+			 R_CMD_COUNT R_CMD_HELP R_CMD_ABOUT
 
 %%
 commands: 
@@ -49,6 +47,7 @@ command:
        | print_command
 			 | count_command
 			 | help_command
+			 | about_command
        ;
 
 open_command: R_CMD_OPEN R_QWORD { leveldb_open($2); free($2); }
@@ -69,11 +68,13 @@ snap_command: R_CMD_SNAP { leveldb_snap(); }
 
 unsnap_command: R_CMD_UNSNAP { leveldb_unsnap(); }
 
-print_command: R_CMD_PRINT R_ARG_KEYS { leveldb_print($2); free($2); }
+print_command: R_CMD_PRINT { leveldb_print(); }
 
 count_command: R_CMD_COUNT { leveldb_count(); }
 
-help_command: R_CMD_HELP { printf("help\n"); }
+help_command: R_CMD_HELP { leveldb_help(); }
+
+about_command: R_CMD_ABOUT { leveldb_about(); }
 
 ptype: R_NUMBER | R_BYTES | R_QWORD
 
