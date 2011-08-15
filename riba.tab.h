@@ -58,7 +58,8 @@
      R_CMD_PRINT = 274,
      R_CMD_COUNT = 275,
      R_CMD_HELP = 276,
-     R_CMD_ABOUT = 277
+     R_CMD_ABOUT = 277,
+     R_CMD_EXIT = 278
    };
 #endif
 /* Tokens.  */
@@ -82,6 +83,7 @@
 #define R_CMD_COUNT 275
 #define R_CMD_HELP 276
 #define R_CMD_ABOUT 277
+#define R_CMD_EXIT 278
 
 
 

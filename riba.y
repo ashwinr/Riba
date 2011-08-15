@@ -27,7 +27,7 @@ int yywrap()
 %token R_NEWLINE R_NUMBER R_BYTES R_QWORD R_COMMA R_SQUOTE R_EQ
 			 R_CMD_OPEN R_CMD_CLOSE R_CMD_GET R_CMD_PUT R_CMD_DELETE
 			 R_CMD_BATCH R_CMD_COMMIT R_CMD_SNAP R_CMD_UNSNAP R_CMD_PRINT
-			 R_CMD_COUNT R_CMD_HELP R_CMD_ABOUT
+			 R_CMD_COUNT R_CMD_HELP R_CMD_ABOUT R_CMD_EXIT
 
 %%
 commands: 
@@ -48,6 +48,7 @@ command:
 			 | count_command
 			 | help_command
 			 | about_command
+			 | exit_command
        ;
 
 open_command: R_CMD_OPEN R_QWORD { leveldb_open($2); free($2); }
@@ -75,6 +76,8 @@ count_command: R_CMD_COUNT { leveldb_count(); }
 help_command: R_CMD_HELP { leveldb_help(); }
 
 about_command: R_CMD_ABOUT { leveldb_about(); }
+
+exit_command: R_CMD_EXIT { leveldb_exit(); }
 
 ptype: R_NUMBER | R_BYTES | R_QWORD
 

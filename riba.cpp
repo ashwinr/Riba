@@ -23,6 +23,35 @@ leveldb::WriteBatch lbatch;
 bool exists_snapshot = false;
 leveldb::ReadOptions loptions;
 
+void clear_db_state()
+{
+  if(!ldb) return;
+
+  // Clear any pending batches
+  if(should_batch)
+  {
+    should_batch = false;
+    lbatch.Clear();
+  }
+  
+  // Clear any snapshots
+  if(exists_snapshot)
+  {
+    exists_snapshot = false;
+    ldb->ReleaseSnapshot(loptions.snapshot);
+  }
+}
+
+bool get_confirmation(const std::string& question,
+                      const std::string& yes,
+                      const std::string& no)
+{
+  std::string answer;
+  std::cout << question;
+  std::cin >> answer;
+  return (answer == yes);
+}
+
 /* Is this slice a string? */
 bool is_string(const char* str, size_t len)
 {
@@ -150,6 +179,7 @@ void leveldb_close()
 {
   if(ldb)
   {
+    clear_db_state();
     delete ldb;
     ldb = NULL;
   }
@@ -157,7 +187,7 @@ void leveldb_close()
 
 void leveldb_get(const char* key)
 {
-  assert(ldb);
+  if(!ldb) return;
 
   std::string value;
   leveldb::ReadOptions options = leveldb::ReadOptions();
@@ -179,7 +209,7 @@ void leveldb_get(const char* key)
 
 void leveldb_put(const char* key, const char* value)
 {
-  assert(ldb);
+  if(!ldb) return;
 
   leveldb::Slice key_slice = make_slice(key);
   leveldb::Slice value_slice = make_slice(value);
@@ -201,7 +231,7 @@ void leveldb_put(const char* key, const char* value)
 
 void leveldb_delete(const char* key)
 {
-  assert(ldb);
+  if(!ldb) return;
   
   leveldb::Slice key_slice = make_slice(key);
   
@@ -222,8 +252,7 @@ void leveldb_delete(const char* key)
 
 void leveldb_start_batch()
 {
-  assert(ldb);
-  if(should_batch) return;
+  if(!ldb || should_batch) return;
 
   should_batch = true;
   lbatch.Clear();
@@ -231,8 +260,7 @@ void leveldb_start_batch()
 
 void leveldb_commit_batch()
 {
-  assert(ldb);
-  if(!should_batch) return;
+  if(!ldb || !should_batch) return;
   
   leveldb::Status s = ldb->Write(leveldb::WriteOptions(), &lbatch);
   if(!s.ok())
@@ -246,8 +274,7 @@ void leveldb_commit_batch()
 
 void leveldb_snap()
 {
-  assert(ldb);
-  if(exists_snapshot) return;
+  if(!ldb || exists_snapshot) return;
 
   exists_snapshot = true;
   loptions.snapshot = ldb->GetSnapshot();
@@ -255,7 +282,7 @@ void leveldb_snap()
 
 void leveldb_unsnap()
 {
-  assert(ldb);
+  if(!ldb) return;
 
   if(exists_snapshot)
   {
@@ -266,14 +293,13 @@ void leveldb_unsnap()
 
 void leveldb_print()
 {
-  assert(ldb);
+  if(!ldb) return;
 
   leveldb::Iterator* it = ldb->NewIterator(leveldb::ReadOptions());
   for(it->SeekToFirst(); it->Valid(); it->Next())
   {
     std::cout << it->key() << " : " <<  it->value() << std::endl;
   }
-  assert(it->status().ok());
   delete it;
 }
 
@@ -281,35 +307,45 @@ void leveldb_print()
 // in the database, until a more efficient method can be found
 void leveldb_count()
 {
-  assert(ldb);
+  if(!ldb) return;
 
   size_t count = 0;
   leveldb::Iterator* it = ldb->NewIterator(leveldb::ReadOptions());
 
   for(it->SeekToFirst(); it->Valid(); it->Next(), count++);
-
-  assert(it->status().ok());
   std::cout << count << std::endl;
-
   delete it;
+}
+
+void leveldb_exit(void)
+{
+  std::string exitString("A batch with uncommitted updates might exist. Really exit? [y/n] ");
+  if(should_batch && get_confirmation(exitString, "y", "n")==false)
+  {
+    return;
+  }
+
+  leveldb_close();
+  exit(0);
 }
 
 void leveldb_help(void)
 {
   std::cout << "The following list of commands are supported in riba:" << std::endl;
-  std::cout << "open" << std::endl;
-  std::cout << "close" << std::endl;
-  std::cout << "get" << std::endl;
-  std::cout << "put" << std::endl;
-  std::cout << "delete" << std::endl;
-  std::cout << "batch" << std::endl;
-  std::cout << "commit" << std::endl;
-  std::cout << "snap" << std::endl;
-  std::cout << "unsnap" << std::endl;
-  std::cout << "print" << std::endl;
-  std::cout << "count" << std::endl;
-  std::cout << "help" << std::endl;
-  std::cout << "about" << std::endl;
+  std::cout << "open 'dir'        - Open/Create a database at the specified directory" << std::endl;
+  std::cout << "close             - Close the database" << std::endl;
+  std::cout << "get <key>         - Get value for <key>" << std::endl;
+  std::cout << "put <key> <value> - Insert key-value pair" << std::endl;
+  std::cout << "delete <key>      - Delete value at <key>" << std::endl;
+  std::cout << "batch             - Start a new batch" << std::endl;
+  std::cout << "commit            - Commit the batch of operations" << std::endl;
+  std::cout << "snap              - Take a snapshot of the database" << std::endl;
+  std::cout << "unsnap            - Delete the snapshot" << std::endl;
+  std::cout << "print             - Print the contents of the database" << std::endl;
+  std::cout << "count             - Print the number of elements in the database" << std::endl;
+  std::cout << "help              - Print this help" << std::endl;
+  std::cout << "about             - About riba" << std::endl;
+  std::cout << "exit              - Exit" << std::endl;
 }
 
 void leveldb_about(void)

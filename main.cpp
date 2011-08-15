@@ -1,7 +1,9 @@
 #include <iostream>
+#include <exception>
 #include <readline/readline.h>
 #include <readline/history.h>
 
+#include "riba.h"
 #include "lex.yy.h"
 
 int yyparse();
@@ -14,18 +16,31 @@ int main(int argc, char** argv)
   rl_bind_key('\t', rl_insert);
 
   // If processing from stdin, evaluate continously
-  while((line_buf=readline(">>> ")) != NULL)
+  while(1)
   {
+    line_buf = readline(">>> ");
+
+    // Encountered an EOF (i.e. C-d), so exit gracefully
+    if(line_buf == NULL)
+    {
+      std::cout << std::endl;
+      leveldb_exit();
+      continue; // continue in case the user didn't want to exit
+    }
+    
     if(line_buf[0] == 0) continue;
     // Add a newline to the end of the buffer
     std::string yyline(line_buf);
     yyline += "\n";
 
-    YY_BUFFER_STATE yybs = yy_scan_string(yyline.c_str());
-    yy_switch_to_buffer(yybs);
-    yyparse();
-    yy_delete_buffer(yybs);
-    add_history(line_buf);
+    try {
+      YY_BUFFER_STATE yybs = yy_scan_string(yyline.c_str());
+      yy_switch_to_buffer(yybs);
+      yyparse();
+      yy_delete_buffer(yybs);
+      add_history(line_buf);
+    }
+    catch(...) {} /* do nothing */
   }
 
   // Unnecessary

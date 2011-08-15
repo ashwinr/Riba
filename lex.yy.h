@@ -308,7 +308,7 @@ extern int yylex (void);
 #undef YY_DECL
 #endif
 
-#line 57 "riba.l"
+#line 59 "riba.l"
 
 
 #line 315 "lex.yy.h"

@@ -27,4 +27,6 @@ void leveldb_help();
 
 void leveldb_about();
 
+void leveldb_exit();
+
 #endif
