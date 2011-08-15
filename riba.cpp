@@ -58,7 +58,7 @@ bool is_string(const char* str, size_t len)
   if(!str) return false;
   for(size_t i=0; i<len; i++)
   {
-    if( !isalpha( str[i]) )
+    if( !isprint( str[i]) )
       return false;
   }
   return true;
@@ -86,12 +86,16 @@ char from_hex(char hbyte)
 leveldb::Slice make_slice(const char* sdata)
 {
   int i=0, len = strlen(sdata);
-  
-  // If the data is a string, create a string slice out of it
-  for(i=0; i<len && isalpha(sdata[i]); i++);
+
+  // If the data is an integer, handle it accordingly
+  for(i=0; i<len && isdigit(sdata[i]); i++);
   if(i == len)
   {
-    return leveldb::Slice( strdup(sdata) );
+    std::stringstream ss;
+    int *number = (int*)malloc(sizeof(int));
+    ss << sdata;
+    ss >> (*number);
+    return leveldb::Slice((const char*)number, sizeof(int));
   }
 
   // If the data is a hex string, create the appropriate bytes
@@ -120,12 +124,8 @@ leveldb::Slice make_slice(const char* sdata)
     return leveldb::Slice(hdata, hlen);
   }
 
-  // Else the data is just a number
-  std::stringstream ss;
-  int *number = (int*)malloc(sizeof(int));
-  ss << sdata;
-  ss >> (*number);
-  return leveldb::Slice((const char*)number, sizeof(int));
+  // Else the data is just a string
+  return leveldb::Slice( strdup(sdata) );
 }
 
 std::string to_print(const char* stream, size_t len)
