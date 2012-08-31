@@ -27,7 +27,7 @@ int yywrap()
 %token R_NEWLINE R_NUMBER R_BYTES R_QWORD R_COMMA R_SQUOTE R_EQ
 			 R_CMD_OPEN R_CMD_CLOSE R_CMD_GET R_CMD_PUT R_CMD_DELETE
 			 R_CMD_BATCH R_CMD_COMMIT R_CMD_SNAP R_CMD_UNSNAP R_CMD_PRINT
-			 R_CMD_COUNT R_CMD_HELP R_CMD_ABOUT R_CMD_EXIT
+			 R_CMD_COMPACT R_CMD_COUNT R_CMD_HELP R_CMD_ABOUT R_CMD_EXIT
 
 %%
 commands: 
@@ -39,16 +39,17 @@ command:
        | close_command
        | get_command
        | put_command
-			 | delete_command
+       | delete_command
        | batch_command
        | commit_command
        | snap_command
        | unsnap_command
        | print_command
-			 | count_command
-			 | help_command
-			 | about_command
-			 | exit_command
+       | compact_command
+       | count_command
+       | help_command
+       | about_command
+       | exit_command
        ;
 
 open_command: R_CMD_OPEN R_QWORD { leveldb_open($2); free($2); }
@@ -70,6 +71,8 @@ snap_command: R_CMD_SNAP { leveldb_snap(); }
 unsnap_command: R_CMD_UNSNAP { leveldb_unsnap(); }
 
 print_command: R_CMD_PRINT { leveldb_print(); }
+
+compact_command: R_CMD_COMPACT { leveldb_compact(); }
 
 count_command: R_CMD_COUNT { leveldb_count(); }
 

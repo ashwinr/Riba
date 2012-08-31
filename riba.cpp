@@ -304,6 +304,13 @@ void leveldb_print()
   delete it;
 }
 
+void leveldb_compact()
+{
+  if(!ldb) return;
+  
+  ldb->CompactRange(NULL, NULL);
+}
+
 // Currently an inefficient way of printing out the total number of elements
 // in the database, until a more efficient method can be found
 void leveldb_count()

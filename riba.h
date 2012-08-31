@@ -21,6 +21,8 @@ void leveldb_unsnap();
 
 void leveldb_print();
 
+void leveldb_compact();
+
 void leveldb_count();
 
 void leveldb_help();

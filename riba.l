@@ -40,6 +40,8 @@ extern YYSTYPE yylval;
 
 ^print$ { return R_CMD_PRINT; }
 
+^compact$ { return R_CMD_COMPACT; }
+
 ^count$ { return R_CMD_COUNT; }
 
 ^help$ { return R_CMD_HELP; }
