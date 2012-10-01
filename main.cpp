@@ -11,6 +11,12 @@ int yyparse();
 int main(int argc, char** argv)
 {
   char* line_buf;
+  // If an argument is given on the command line, open it
+  //  for example use 'riba my_leveldb' to open LevelDB in my_leveldb
+  if(argc >= 2)
+  {
+	leveldb_open(argv[1]);
+  }
 
   // Disable any default autocomplete
   rl_bind_key('\t', rl_insert);
