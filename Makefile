@@ -20,7 +20,7 @@ clean:
 
 $(OUTPUT): $(OBJECTS)
 	rm -f $@
-	$(CC) $(OBJECTS) $(LDFLAGS) -o $(OUTPUT)
+	$(CC) $(OBJECTS) $(LDFLAGS) -o $@
 	
 $(OUTPUT)-snappy: $(OBJECTS)
 	rm -f $@
