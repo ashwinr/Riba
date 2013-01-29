@@ -1,0 +1,9 @@
+#Ignore all generated files
+*.o
+lex.yy.c
+riba
+riba.tab.c
+riba.tab.h
+riba.tab.o
+
+
