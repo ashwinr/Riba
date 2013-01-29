@@ -22,4 +22,4 @@ lex.yy.c: riba.l riba.tab.h
 	flex riba.l
 
 $(OUTPUT): $(OBJECTS)
-	$(CC) $(LDFLAGS) $(OBJECTS) -o $@
+	$(CC) $(OBJECTS) -o $@ $(LDFLAGS) 
