@@ -1,7 +1,8 @@
 CC = g++
 
 CFLAGS = -c -Wall -I.
-LDFLAGS= -lleveldb -lreadline -lncurses -lpthread
+LDFLAGS= -lleveldb -lreadline
+LDFLAGS_SNAPPY=$(LDFLAGS) -lsnappy
 OUTPUT = riba
 
 OBJECTS = \
@@ -11,9 +12,10 @@ OBJECTS = \
   main.o
 
 all: $(OUTPUT)
+snappy: $(OUTPUT)-snappy
 
 clean:
-	-rm -f $(OUTPUT) *.o riba.tab.* lex.yy.*
+	-rm -f $(OUTPUT) *.o
 
 riba.tab.c riba.tab.h: riba.y
 	bison -d riba.y
@@ -22,4 +24,9 @@ lex.yy.c: riba.l riba.tab.h
 	flex riba.l
 
 $(OUTPUT): $(OBJECTS)
-	$(CC) $(OBJECTS) -o $@ $(LDFLAGS) 
+	rm -f $@
+	$(CC) $(OBJECTS) -o $@ $(LDFLAGS)
+
+$(OUTPUT)-snappy: $(OBJECTS)
+	rm -f $@
+	$(CC) $(OBJECTS) $(LDFLAGS_SNAPPY) -o $(OUTPUT)

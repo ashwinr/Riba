@@ -29,6 +29,8 @@ Taking a database snapshot preserves the contents of the database for all subseq
 ### Compilation
 Type **make** in the download directory.
 
+If you want to compile with Snappy, type **make snappy** instead.
+
 Google's [leveldb](http://code.google.com/p/leveldb/) is a dependency and needs to be downloaded and installed. leveldb headers and the library archive needs to be accessible within the compilation environment.
 
 ### Bugs and enhancements
