@@ -39,6 +39,9 @@ Any bug reports, fixes, ideas, or general comments are most welcome. Please repo
 ### Authors
 Ashwin Ramaswamy.
 
+### Contributors
+[ulikoehler](https://github.com/ulikoehler)
+
 ### Copyright
 This software is provided "as is". The author(s) take no responsibility for any actions caused by this program on your system.
 
